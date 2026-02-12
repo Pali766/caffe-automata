@@ -1,1 +1,3 @@
 # caffe-automata
+**ll
+*jj
