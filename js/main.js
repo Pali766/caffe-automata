@@ -3,6 +3,36 @@ import { GameState, currentState, setState, playerIngredients, resetPlayerIngred
 import { createIngredientButtons, ingredientButtons, handleIngredientClick } from "./machine.js";
 import { checkCoinInsert } from "./drag.js";
 
+const coffeeRecipes = ["Espresso", "Latte", "Cappuccino", "Americano"];
+let coffeeSelected = false;
+
+function showCoffeeSelection() {
+    const overlay = document.createElement("div");
+    overlay.style = `
+        position:absolute; top:0; left:0; width:100%; height:100%;
+        background: rgba(0,0,0,0.7); display:flex; flex-direction:column;
+        justify-content:center; align-items:center; z-index:1000;
+    `;
+    const title = document.createElement("div");
+    title.innerText = "Válassz kávét!";
+    title.style.color = "white"; title.style.fontSize="24px"; title.style.marginBottom="20px";
+    overlay.appendChild(title);
+
+    coffeeRecipes.forEach(name => {
+        const btn = document.createElement("button");
+        btn.innerText = name;
+        btn.style.margin="5px"; btn.style.padding="10px 20px"; btn.style.fontSize="18px";
+        btn.addEventListener("click", ()=>{
+            uiText.innerText = name + " készül! ☕";
+            coffeeSelected = true;
+            document.body.removeChild(overlay);
+        });
+        overlay.appendChild(btn);
+    });
+
+    document.body.appendChild(overlay);
+}
+
 let scene, camera, renderer;
 let coin, machine;
 let raycaster = new THREE.Raycaster();
