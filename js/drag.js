@@ -13,5 +13,10 @@ export function checkCoinInsert(coin, machine, uiElement) {
         setState(GameState.MAKING_COFFEE);
 
         uiElement.innerText = "Rendelés: " + order.name;
+    if(coin.position.distanceTo(machine.position) < 1){
+    if(!coffeeSelected){
+        uiText.innerText = "Érme bent! ☕";
+        showCoffeeSelection();
+        coffeeSelected = true;
     }
 }
