@@ -3,14 +3,70 @@
 <head>
     <meta charset="UTF-8" />
     <title>3D Caffe Automata</title>
-    <link rel="stylesheet" href="style.css" />
+    <style> body { margin: 0; overflow: hidden; font-family: Arial, sans-serif; } #ui{position:absolute; top:10px; left:10px; background:rgba(255,255,255,0.8); padding:10px 20px;border-radius:8px;} </style>
 </head>
 <body>
+<div id="ui"><h2 id="orderText">Dobd be az érmét!</h2></div>
 
-<div id="ui">
-    <h2 id="orderText">Dobd be az érmét!</h2>
-</div>
+<script type="module">
 
-<script type="module" src="js/main.js"></script>
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160/build/three.module.js';
+import { DragControls } from 'https://cdn.jsdelivr.net/npm/three@0.160/examples/jsm/controls/DragControls.js';
+
+// alap scene
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// fény
+const light = new THREE.DirectionalLight(0xffffff,1);
+light.position.set(5,10,7);
+scene.add(light);
+
+// gép
+const machine = new THREE.Mesh(
+    new THREE.BoxGeometry(2,3,1),
+    new THREE.MeshStandardMaterial({color:0x333333})
+);
+machine.position.set(1.5,0,0);
+scene.add(machine);
+
+// érme
+const coin = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.3,0.3,0.1,32),
+    new THREE.MeshStandardMaterial({color:0xffd700})
+);
+coin.rotation.x = Math.PI/2;
+coin.position.set(-2,0,0);
+scene.add(coin);
+
+// Drag control
+const dragControls = new DragControls([coin], camera, renderer.domElement);
+
+// kamera
+camera.position.z = 5;
+
+// dolgozzunk a kávérendeléssel
+const uiText = document.getElementById("orderText");
+let coinInserted = false;
+
+dragControls.addEventListener('dragend', (event) => {
+    const obj = event.object;
+    const dist = obj.position.distanceTo(machine.position);
+    if (dist < 1 && !coinInserted) {
+        coinInserted = true;
+        uiText.innerText = "Érme bent! Válassz kávét...";
+    }
+});
+
+function animate() {
+    requestAnimationFrame(animate);
+    renderer.render(scene, camera);
+}
+animate();
+
+</script>
 </body>
 </html>
