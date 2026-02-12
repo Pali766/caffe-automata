@@ -99,29 +99,31 @@ function updateMouse(event) {
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 }
 
-function checkRecipe() {
-    if (currentState !== GameState.MAKING_COFFEE) return;
+import { currentOrder, playerIngredients, resetGame } from "./gameState.js";
 
-    const required = window.currentOrder.ingredients;
+function checkRecipe() {
+
+    if (!currentOrder) return;
+
+    const required = currentOrder.ingredients;
 
     if (playerIngredients.length === required.length) {
+
         const correct = required.every((ing, i) => ing === playerIngredients[i]);
 
         if (correct) {
             uiText.innerText = "Kész! ☕";
-            setState(GameState.SUCCESS);
         } else {
             uiText.innerText = "Hibás recept! ❌";
-            setState(GameState.FAIL);
         }
 
         setTimeout(() => {
-            resetPlayerIngredients();
-            setState(GameState.WAITING_FOR_COIN);
+            resetGame();
             uiText.innerText = "Dobd be az érmét!";
         }, 2000);
     }
 }
+
 
 function animate() {
     requestAnimationFrame(animate);
