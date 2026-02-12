@@ -1,20 +1,17 @@
-import { setState, GameState } from "./gameState.js";
+import { setState, setOrder, GameState } from "./gameState.js";
 import { getRandomRecipe } from "./recipes.js";
-import { currentOrder } from "./gameState.js";
 
 export function checkCoinInsert(coin, machine, uiElement) {
-    if (coin.position.distanceTo(machine.position) < 1) {
 
-        setState(GameState.ORDER_GENERATED);
+    if (coin.position.distanceTo(machine.position) < 1 &&
+        coin.userData.inserted !== true) {
+
+        coin.userData.inserted = true;
 
         const order = getRandomRecipe();
-        window.currentOrder = order;
+        setOrder(order);
+        setState(GameState.MAKING_COFFEE);
 
         uiElement.innerText = "Rendelés: " + order.name;
-
-        setTimeout(() => {
-            setState(GameState.MAKING_COFFEE);
-        }, 1000);
     }
 }
-
