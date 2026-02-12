@@ -2,7 +2,6 @@ export const GameState = {
     WAITING_FOR_COIN: "WAITING_FOR_COIN",
     ORDER_GENERATED: "ORDER_GENERATED",
     MAKING_COFFEE: "MAKING_COFFEE",
-    CHECKING: "CHECKING",
     SUCCESS: "SUCCESS",
     FAIL: "FAIL"
 };
@@ -15,7 +14,12 @@ export function setState(newState) {
     currentState = newState;
 }
 
-export function resetPlayerIngredients() {
-    playerIngredients = [];
+export function setOrder(order) {
+    currentOrder = order;
 }
 
+export function resetGame() {
+    playerIngredients.length = 0;
+    currentOrder = null;
+    currentState = GameState.WAITING_FOR_COIN;
+}
