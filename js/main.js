@@ -79,15 +79,20 @@ function onMouseMove(event) {
     updateMouse(event);
     raycaster.setFromCamera(mouse, camera);
 
-    const planeZ = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
-    const point = new THREE.Vector3();
-    raycaster.ray.intersectPlane(planeZ, point);
+    // DINAMIKUS sík az érme z pozícióján
+    const plane = new THREE.Plane(
+        new THREE.Vector3(0, 0, 1),
+        -selectedObject.position.z
+    );
 
-    selectedObject.position.x = point.x;
-    selectedObject.position.y = point.y;
+    const point = new THREE.Vector3();
+    raycaster.ray.intersectPlane(plane, point);
+
+    selectedObject.position.copy(point);
 
     checkCoinInsert(coin, machine, uiText);
 }
+
 
 function updateMouse(event) {
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
