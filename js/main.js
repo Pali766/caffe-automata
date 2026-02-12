@@ -1,10 +1,15 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160/build/three.module.js";
+import { GameState, currentState, setState, playerIngredients, resetPlayerIngredients } from "./gameState.js";
+import { createIngredientButtons, ingredientButtons, handleIngredientClick } from "./machine.js";
+import { checkCoinInsert } from "./drag.js";
 
 let scene, camera, renderer;
 let coin, machine;
 let raycaster = new THREE.Raycaster();
 let mouse = new THREE.Vector2();
 let selectedObject = null;
+
+const uiText = document.getElementById("orderText");
 
 init();
 animate();
@@ -13,12 +18,7 @@ function init() {
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0xf4f4f4);
 
-    camera = new THREE.PerspectiveCamera(
-        75,
-        window.innerWidth / window.innerHeight,
-        0.1,
-        1000
-    );
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.z = 5;
 
     renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -31,6 +31,7 @@ function init() {
 
     createMachine();
     createCoin();
+    createIngredientButtons(scene);
 
     window.addEventListener("mousedown", onMouseDown);
     window.addEventListener("mousemove", onMouseMove);
@@ -56,12 +57,19 @@ function createCoin() {
 
 function onMouseDown(event) {
     updateMouse(event);
-
     raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects([coin]);
+
+    const intersects = raycaster.intersectObjects([coin, ...ingredientButtons]);
 
     if (intersects.length > 0) {
-        selectedObject = intersects[0].object;
+        const obj = intersects[0].object;
+
+        if (obj === coin) {
+            selectedObject = coin;
+        } else {
+            handleIngredientClick(obj);
+            checkRecipe();
+        }
     }
 }
 
@@ -70,6 +78,7 @@ function onMouseMove(event) {
 
     updateMouse(event);
     raycaster.setFromCamera(mouse, camera);
+
     const planeZ = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
     const point = new THREE.Vector3();
     raycaster.ray.intersectPlane(planeZ, point);
@@ -77,7 +86,7 @@ function onMouseMove(event) {
     selectedObject.position.x = point.x;
     selectedObject.position.y = point.y;
 
-    checkCoinInsert();
+    checkCoinInsert(coin, machine, uiText);
 }
 
 function updateMouse(event) {
@@ -85,10 +94,27 @@ function updateMouse(event) {
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 }
 
-function checkCoinInsert() {
-    if (coin.position.distanceTo(machine.position) < 1) {
-        document.getElementById("orderText").innerText =
-            "Válassz kávét! (Espresso / Latte / Cappuccino)";
+function checkRecipe() {
+    if (currentState !== GameState.MAKING_COFFEE) return;
+
+    const required = window.currentOrder.ingredients;
+
+    if (playerIngredients.length === required.length) {
+        const correct = required.every((ing, i) => ing === playerIngredients[i]);
+
+        if (correct) {
+            uiText.innerText = "Kész! ☕";
+            setState(GameState.SUCCESS);
+        } else {
+            uiText.innerText = "Hibás recept! ❌";
+            setState(GameState.FAIL);
+        }
+
+        setTimeout(() => {
+            resetPlayerIngredients();
+            setState(GameState.WAITING_FOR_COIN);
+            uiText.innerText = "Dobd be az érmét!";
+        }, 2000);
     }
 }
 
@@ -96,4 +122,3 @@ function animate() {
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
 }
-
